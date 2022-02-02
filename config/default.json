@@ -1,0 +1,12 @@
+{
+    "redis": {
+        "host": "149.248.54.177",
+        "port": 6379,
+        "password": "Q4CuTB9vp4zh",
+        "keyPrefix": "ucp|",
+        "connectTimeout": 17000,
+        "maxRetriesPerRequest": 4,
+        "enableOfflineQueue": true,
+        "showFriendlyErrorStack": true
+    }
+}
