@@ -1,13 +1,20 @@
-const { contactModel } = require('../database/models');
+const models = require('../database/models');
 
-const upsert = (username, online = false) => {
+const model = () => {
+    return models.getModel('contacts');
+}
+
+const upsert = async (username, online = false) => {
+
+    const contactModel = await model();
+
     return contactModel.updateOne(
         {
             identity: username
         },
         {
             $set: {
-                lastRead: Date.now(),
+                lastRead: new Date().getUTCDate(),
                 online: online,
             },
             $setOnInsert: {
@@ -20,7 +27,10 @@ const upsert = (username, online = false) => {
     );
 }
 
-const getLastRead = (username) => {
+const getLastRead = async (username) => {
+
+    const contactModel = await model();
+
     return contactModel.findOne(
         {
             identity: username,
@@ -34,6 +44,5 @@ const getLastRead = (username) => {
 
 module.exports = {
     upsert,
-    update,
     getLastRead,
 }

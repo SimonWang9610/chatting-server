@@ -1,18 +1,24 @@
-const { messageModel } = require('../database/models');
+const models = require('../database/models');
 
+const model = () => {
+    return models.getModel('messages');
+}
 
-const cacheMessage = (message) => {
+const cacheMessage = async (message) => {
+
+    const messageModel = await model();
+
     return messageModel.updateOne(
         {
-            chatId: message.chatId,
+            chatId: message.identity,
         },
         {
             $setOnInsert: {
-                chatId: message.chatId,
-                chatName: message.chatName,
-                sender: message.sender,
-                text: message.text,
-                creation: message.creation,
+                chatId: message.identity,
+                chatName: message.data.chatName,
+                sender: message.data.sender,
+                text: message.data.text,
+                creation: message.data.creation,
                 unread: message.unread,
             }
         },
@@ -22,7 +28,9 @@ const cacheMessage = (message) => {
     );
 };
 
-const decrementUnread = (chatId) => {
+const decrementUnread = async (chatId) => {
+    const messageModel = await model();
+
    return  messageModel.updateOne(
         {
             chatId: chatId,
@@ -35,7 +43,24 @@ const decrementUnread = (chatId) => {
     );
 };
 
-const clear = () => {
+const updateUnread = async (chatId, unread) => {
+    const messageModel = await model();
+
+    return messageModel.updateOne(
+        {
+            id: chatId
+        },
+        {
+            $set: {
+                unread: unread,
+            }
+        }
+    );
+}
+
+const clear = async () => {
+    const messageModel = await model();
+
     return messageModel.deleteMany(
         {
             unread: {
@@ -46,7 +71,9 @@ const clear = () => {
 
 }
 
-const history = (username, lastRead) => {
+const history = async (username, lastRead) => {
+    const messageModel = await model();
+
     // retrieve all messages created since the last login/read of users
     return messageModel.find(
         {
@@ -66,6 +93,7 @@ const history = (username, lastRead) => {
 module.exports = {
     cacheMessage,
     decrementUnread,
+    updateUnread,
     clear,
     history,
 }

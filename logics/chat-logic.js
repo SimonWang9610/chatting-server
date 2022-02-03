@@ -1,6 +1,12 @@
-const { chatModel } = require('../database/models');
+const models = require('../database/models');
 
-const upsert = (data) => {
+const model = () => {
+    return models.getModel('chats');
+}
+
+const upsert = async (data) => {
+
+    const chatModel = await model();
 
     return chatModel.updateOne(
         {
@@ -21,7 +27,9 @@ const upsert = (data) => {
     );
 }
 
-const addMember = (chatId, newMembers) => {
+const addMember = async (chatId, newMembers) => {
+    const chatModel = await model();
+
     return chatModel.updateOne(
         {
             id: chatId,
@@ -36,7 +44,9 @@ const addMember = (chatId, newMembers) => {
     );
 }
 
-const removeMember = (chatId, targetMember) => {
+const removeMember = async (chatId, targetMember) => {
+    const chatModel = await model();
+
     return chatModel.updateOne(
         {
             id: chatId,
@@ -54,7 +64,9 @@ const removeMember = (chatId, targetMember) => {
     );
 }
 
-const getMembers = (chatId) => {
+const getMembers = async (chatId) => {
+    const chatModel = await model();
+
     return chatModel.findOne(
         {
             id: chatId
@@ -66,7 +78,9 @@ const getMembers = (chatId) => {
     );
 }
 
-const getAllChats = (username) => {
+const getAllChats = async (username) => {
+    const chatModel = await model();
+
     return chatModel.find(
         {
             members: username

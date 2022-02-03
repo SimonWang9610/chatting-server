@@ -18,7 +18,7 @@ const contactSchema = new Schema(
         },
         lastRead: {
             type: Date,
-            default: Date.now(),
+            default: new Date().getUTCDate(),
         }
     },
     {
@@ -47,28 +47,11 @@ const chatSchema = new Schema(
         },
         creation: {
             type: Date,
-            default: Date.now(),
+            default: new Date().getUTCDate(),
         },
     },
     {
         collection: 'chats',
-    }
-);
-
-const memberSchema = new Schema(
-    {
-        chatId: {
-            type: String,
-            required: true,
-        },
-        members: {
-            type: [],
-            minlength: 2,
-            required: true,
-        }
-    },
-    {
-        collection: 'members',
     }
 );
 
@@ -91,7 +74,7 @@ const messageSchema = new Schema(
         },
         creation: {
             type: Date,
-            default: Date.now(),
+            default: new Date().getUTCDate(),
         },
         unread: {
             type: Number,
@@ -107,6 +90,5 @@ const messageSchema = new Schema(
 module.exports = {
     contactSchema,
     chatSchema,
-    memberSchema,
     messageSchema,
 };
