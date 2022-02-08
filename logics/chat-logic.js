@@ -93,10 +93,21 @@ const getAllChats = async (username) => {
     );
 }
 
+const getChat = async (chatId) => {
+    const chatModel = await model();
+
+    return chatModel.findOne(
+        {
+            identity: chatId
+        }
+    );
+}
+
 module.exports = {
     addMember,
     removeMember,
     upsert,
     getMembers,
     getAllChats,
+    getChat,
 }

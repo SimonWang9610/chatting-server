@@ -42,7 +42,28 @@ const getLastRead = async (username) => {
     );
 }
 
+const isValidName = async (username) => {
+    const contactModel = await model();
+
+    const contacts = await contactModel.find(
+        {
+            identity: username
+        }
+    ).projection(
+        {
+            identity: 1
+        }
+    );
+
+    if (contacts.length == 0) {
+        return true
+    } else {
+        return false;
+    }
+}
+
 module.exports = {
     upsert,
     getLastRead,
+    isValidName,
 }
