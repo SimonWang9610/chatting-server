@@ -7,7 +7,7 @@ const messageLogic = require('../logics/message-logic');
 const contactBroadcast = (contact) => { 
 
     for (let client of clients.values()) {
-        if (client !== clients[contact.identity]) {
+        if (client !== clients.get(contact.identity)) {
             client.send(JSON.stringify(contact));
         }
     }
