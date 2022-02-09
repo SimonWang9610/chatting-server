@@ -22,45 +22,54 @@ const clients = require('./cache/client');
 
 // app & webSocket
 const app = express();
-const httpServer = http.createServer(app);
-const wss = new WebSocket.Server({server: httpServer});
 
-publishing();
-subscription();
 
 app.use(bodyParser.urlencoded({ extended: false, limit: '10mb' }));
 app.use(bodyParser.json({ limit: '25mb' }));
 app.use(bodyParser.text());
 
-app.use(methodOverride('X-HTTP-Method'));
-app.use(methodOverride('X-HTTP-Override'));
-app.use(methodOverride('X-Method-Override'));
+// app.use(methodOverride('X-HTTP-Method'));
+// app.use(methodOverride('X-HTTP-Override'));
+// app.use(methodOverride('X-Method-Override'));
 
+const httpServer = http.createServer(app);
+
+const wss = new WebSocket.Server({server: httpServer});
+
+publishing();
+subscription();
 
 app.post(('/login'), async (req, res, next) => {
     const username = req.body.name;
 
     const isValid = await contactLogic.isValidName(username);
 
-    if (isValid) {
-        return res.status(200).json(
-            {
-                success: true,
-                username: username,
-            }
-        );
-    } else {
-        return res.status(200).json({
-           success: false, 
-        });
-    }
+    // if (isValid) {
+    //     return res.status(200).json(
+    //         {
+    //             success: true,
+    //             username: username,
+    //         }
+    //     );
+    // } else {
+    //     return res.status(200).json({
+    //        success: false, 
+    //     });
+    // }
+    
+    return res.status(200).json(
+        {
+            success: true,
+            username: username,
+        }
+    );
 });
 
 app.post('/chat', async(req, res, next) => {
     const payload = req.body;
 
     var hash = crypto.createHash('sha256');
-    hash.update(payload.members);
+    hash.update(payload.members.join(','));
 
     const chatId = hash.digest().toString();
 
@@ -84,11 +93,12 @@ app.post('/chat', async(req, res, next) => {
 
 
 wss.on('connection', (ws, req) => {
-    const username = req.url;
+    const username = req.url.substring(1);
 
     clients.set(username, ws);
 
-    console.log('socket request: ' + req.url + ', response: ' + JSON.stringify(res));
+    console.log('socket request: ' + req.url.substring(1));
+    console.log('Alive clients: ' + clients.size);
 
     updater({
         topic: 'Topic.contact',
@@ -102,9 +112,13 @@ wss.on('connection', (ws, req) => {
     historyMessaging(username, ws);
 
     ws.on('message', (data) => {
-        let msg = JSON.parse(data);
-
+        if (typeof data === Object) {
+            let msg = JSON.parse(data);
         updater(msg);
+        } else {
+
+            console.log(data);
+        }
     });
 
 
@@ -124,6 +138,6 @@ wss.on('connection', (ws, req) => {
 
 });
 
-app.listen(8080, (err) => {
+httpServer.listen(8080, (err) => {
     console.log('Server is listening on 8080');
 });

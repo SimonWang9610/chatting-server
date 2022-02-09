@@ -5,8 +5,9 @@ const sendHistoryMessages = async (username, ws) => {
     
     const lastRead = await contactLogic.getLastRead(username);
 
-    const docs = await messageLogic.history(username, lastRead);
-
+    console.log('message last read: '  +lastRead.lastRead);
+    const docs = await messageLogic.history(username, lastRead.lastRead);
+    console.log('History message: ' + docs.length);
     if (docs.length > 0) {
         docs.forEach(doc => { 
             const msg = {

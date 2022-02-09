@@ -14,7 +14,7 @@ const upsert = async (username, online = false) => {
         },
         {
             $set: {
-                lastRead: new Date().getUTCDate(),
+                lastRead: new Date(new Date().toUTCString()),
                 online: online,
             },
             $setOnInsert: {
@@ -34,8 +34,7 @@ const getLastRead = async (username) => {
     return contactModel.findOne(
         {
             identity: username,
-        }
-    ).projection(
+        }, 
         {
             lastRead: 1,
         }
@@ -49,11 +48,8 @@ const isValidName = async (username) => {
         {
             identity: username
         }
-    ).projection(
-        {
-            identity: 1
-        }
     );
+    console.log('contacts: ' + JSON.stringify(contacts));
 
     if (contacts.length == 0) {
         return true

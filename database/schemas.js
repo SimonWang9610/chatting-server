@@ -18,7 +18,7 @@ const contactSchema = new Schema(
         },
         lastRead: {
             type: Date,
-            default: new Date().getUTCDate(),
+            default: new Date(new Date().toUTCString()),
         }
     },
     {
@@ -47,7 +47,7 @@ const chatSchema = new Schema(
         },
         creation: {
             type: Date,
-            default: new Date().getUTCDate(),
+            default: new Date(new Date().toUTCString()),
         },
     },
     {
@@ -74,7 +74,7 @@ const messageSchema = new Schema(
         },
         creation: {
             type: Date,
-            default: new Date().getUTCDate(),
+            default: new Date(new Date().toUTCString()),
         },
         unread: {
             type: Number,
