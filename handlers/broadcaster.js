@@ -7,17 +7,18 @@ const messageLogic = require('../logics/message-logic');
 const contactBroadcast = (contact) => { 
 
     for (let client of clients.values()) {
-        if (client !== clients.get(contact.identity)) {
-            client.send(JSON.stringify(contact));
-        }
+        // if (client !== clients.get(contact.identity)) {
+        //     client.send(JSON.stringify(contact));
+        // }
+        client.send(JSON.stringify(contact));
     }
 }
 
 const chatBroadcast = async (chat) => {
 
-    const members = await chatLogic.getMembers(chat.identity);
+    const doc = await chatLogic.getMembers(chat.identity);
 
-    for (let member of members) {
+    for (let member of doc.members) {
         if (clients.has(member) && member !== chat.data.username) {
             clients[member].send(JSON.stringify(chat));
         }
@@ -26,19 +27,22 @@ const chatBroadcast = async (chat) => {
 
 const messageBroadcast = async (message) => {
     
-    const members = await chatLogic.getMembers(message.identity);
+    const doc = await chatLogic.getMembers(message.identity);
 
-    let unread = members.length;
+    const msgId = message.msgId;
+    console.log('message ID: ' + msgId);
+    delete message.msgId;
 
-    for (let member of members) {
+    let read = 0;
+
+    for (let member of doc.members) {
         if (clients.has(member)) {
-            clients[member].send(JSON.stringify(message));
-        } else {
-            unread -= 1;
+            clients.get(member).send(JSON.stringify(message));
+            read -= 1;
         }
     }
 
-    messageLogic.updateUnread(message.identity, unread);
+    await messageLogic.updateUnread(msgId, read);
 }
 
 module.exports = (channel, message) => {

@@ -32,7 +32,7 @@ const chatSchema = new Schema(
             type: String,
             default: 'Topic.chat',
         },
-        id: {
+        identity: {
             type: String,
             required: true,
         },

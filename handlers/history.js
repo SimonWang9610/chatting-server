@@ -1,17 +1,28 @@
 const contactLogic = require('../logics/contact-logic');
 const messageLogic = require('../logics/message-logic');
+const chatLogic = require('../logics/chat-logic');
 
 const sendHistoryMessages = async (username, ws) => {
     
-    const lastRead = await contactLogic.getLastRead(username);
+    const contact = await contactLogic.getLastRead(username);
 
-    console.log('message last read: '  +lastRead.lastRead);
-    const docs = await messageLogic.history(username, lastRead.lastRead);
+    console.log('message last read: ' + contact.lastRead);
+
+    const chats = await chatLogic.getAllChats(username).then((docs) => {
+        let arr = [];
+
+        for (let doc of docs) {
+            arr.push(doc.chatId);
+        }
+        return arr;
+     });
+
+    const docs = await messageLogic.history(chats, contact.lastRead);
     console.log('History message: ' + docs.length);
     if (docs.length > 0) {
         docs.forEach(doc => { 
             const msg = {
-                topic: 'Topic.chat',
+                topic: 'Topic.message',
                 identity: doc.chatId,
                 data: {
                     chatName: doc.chatName,
@@ -32,7 +43,7 @@ const sendHistoryMessages = async (username, ws) => {
         });
     }
 
-    await messageLogic.clear();
+    messageLogic.clear();
 
     return true;
  };

@@ -35,13 +35,24 @@ const publishing = async () => {
         if (next.operationType === 'update') {
             const msg = {
                 topic: next.fullDocument.topic,
-                identity: next.fullDocument.id,
+                identity: next.fullDocument.identity,
                 data: {
                     // return the last added member
                     username: next.fullDocument.members[-1]
                 }
             }
             
+            publisher.publish(msg.topic, JSON.stringify(msg));
+        } else if (next.operationType === 'insert') {
+            const msg = {
+                topic: next.fullDocument.topic,
+                identity: next.fullDocument.identity,
+                data: {
+                    id: next.fullDocument.identity,
+                    name: next.fullDocument.name,
+                }
+            };
+
             publisher.publish(msg.topic, JSON.stringify(msg));
         }
     });
@@ -51,11 +62,12 @@ const publishing = async () => {
             const msg = {
                 topic: 'Topic.message',
                 identity: next.fullDocument.chatId,
+                msgId: next.fullDocument._id,
                 data: {
                     chatName: next.fullDocument.chatName,
                     sender: next.fullDocument.sender,
                     text: next.fullDocument.text,
-                    creation: next.fullDocument.creation,
+                    creation: new Date(next.fullDocument.creation).getTime(),
                 }
             };
     

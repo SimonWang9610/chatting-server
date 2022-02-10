@@ -8,9 +8,10 @@ const updateContact = (contact) => {
  }
 
 const updateMessage = async (message) => {
-    const members = await chatLogic.getMembers(message.identity);
-    
-    message['unread'] = members.length;
+    const chat = await chatLogic.getMembers(message.identity);
+    console.log('update message -> chat: ' + JSON.stringify(chat));
+    message.unread = chat.members.length;
+    // message.creation = new Date(parseInt(message.creation));
 
     messageLogic.cacheMessage(message);
 }

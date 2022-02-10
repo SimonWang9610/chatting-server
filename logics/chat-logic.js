@@ -10,14 +10,14 @@ const upsert = async (data) => {
 
     return chatModel.updateOne(
         {
-            id: data.chatId
+            identity: data.chatId
         },
         {
             $set: {
                 name: data.chatName,
             },
             $setOnInsert: {
-                id: data.chatId,
+                identity: data.chatId,
                 members: data.members,
             }
         },
@@ -32,7 +32,7 @@ const addMember = async (chatId, newMembers) => {
 
     return chatModel.updateOne(
         {
-            id: chatId,
+            identity: chatId,
         },
         {
             $push: {
@@ -49,7 +49,7 @@ const removeMember = async (chatId, targetMember) => {
 
     return chatModel.updateOne(
         {
-            id: chatId,
+            identity: chatId,
             members: {
                 $size: {
                     $gt: 2,
@@ -69,12 +69,8 @@ const getMembers = async (chatId) => {
 
     return chatModel.findOne(
         {
-            id: chatId
+            identity: chatId
         },
-    ).projection(
-        {
-            members: 1
-        }
     );
 }
 
@@ -84,11 +80,9 @@ const getAllChats = async (username) => {
     return chatModel.find(
         {
             members: username
-        }
-    ).projection(
+        },
         {
-            id: 1,
-            name: 1,
+            chatId: 1,
         }
     );
 }

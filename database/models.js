@@ -29,7 +29,7 @@ const getModel = async (collection) => {
         case 'messages':
             return connection.model('Message', schemas.messageSchema, 'messages');
         case 'chats':
-            return connection.model('Message', schemas.messageSchema, 'messages');
+            return connection.model('Chat', schemas.chatSchema, 'chats');
         case 'contacts':
             return connection.model('Contact', schemas.contactSchema, 'contacts');
     }

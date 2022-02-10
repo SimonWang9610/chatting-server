@@ -11,6 +11,7 @@ const cacheMessage = async (message) => {
     return messageModel.updateOne(
         {
             chatId: message.identity,
+            creation: message.data.creation,
         },
         {
             $setOnInsert: {
@@ -26,6 +27,7 @@ const cacheMessage = async (message) => {
             upsert: true,
         }
     );
+
 };
 
 const decrementUnread = async (chatId) => {
@@ -43,16 +45,16 @@ const decrementUnread = async (chatId) => {
     );
 };
 
-const updateUnread = async (chatId, unread) => {
+const updateUnread = async (msgId, read) => {
     const messageModel = await model();
-
+    console.log(msgId + ' has read : ' + read);
     return messageModel.updateOne(
         {
-            id: chatId
+            _id: msgId,
         },
         {
-            $set: {
-                unread: unread,
+            $inc: {
+                unread: read,
             }
         }
     );
@@ -71,13 +73,15 @@ const clear = async () => {
 
 }
 
-const history = async (username, lastRead) => {
+const history = async (chats, lastRead) => {
     const messageModel = await model();
 
     // retrieve all messages created since the last login/read of users
     return messageModel.find(
         {
-            members: username,
+            chatId: {
+                $in: chats
+            },
             unread: {
                 $gt: 0,
             },

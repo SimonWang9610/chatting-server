@@ -23,6 +23,11 @@ const clients = require('./cache/client');
 // app & webSocket
 const app = express();
 
+app.use((req, res, next) => {
+    console.log(req.headers);
+    console.log(req.body);
+    next();
+});
 
 app.use(bodyParser.urlencoded({ extended: false, limit: '10mb' }));
 app.use(bodyParser.json({ limit: '25mb' }));
@@ -71,22 +76,40 @@ app.post('/chat', async(req, res, next) => {
     var hash = crypto.createHash('sha256');
     hash.update(payload.members.join(','));
 
-    const chatId = hash.digest().toString();
+    const chatId = hash.digest('base64');
+
+    console.log('create new chat: ' + chatId);
 
     const chat = await chatLogic.getChat(chatId);
 
     if (chat) {
+        console.log('chat in database: ' + JSON.stringify(chat));
         return res.status(200).json({
             success: true,
-            chatId: chat.id,
-            chatName: chat.name
+            id: chat.identity,
+            name: chat.name,
+            members: chat.members,
         });
     } else {
-        return res.status(200).json({
-            success: true,
+        console.log('insert a new chat');
+        const affected = await chatLogic.upsert({
             chatId: chatId,
-            chatName: payload.name
+            chatName: payload.name,
+            members: payload.members,
         });
+
+        if (affected.acknowledged) {
+            return res.status(200).json({
+                success: true,
+                id: chatId,
+                name: payload.name,
+                members: payload.members,
+            });
+        } else {
+            return res.status(500).json({
+                success: false,
+            });
+        }
     }
 
 });
@@ -112,12 +135,16 @@ wss.on('connection', (ws, req) => {
     historyMessaging(username, ws);
 
     ws.on('message', (data) => {
-        if (typeof data === Object) {
-            let msg = JSON.parse(data);
-        updater(msg);
-        } else {
 
-            console.log(data);
+        let dataStr = data.toString('utf-8');
+
+        console.log('Client message: ' + dataStr);
+
+        try {
+            let msg = JSON.parse(dataStr);
+            updater(msg);
+        } catch (e) {
+            console.log('Client message: ' + dataStr);
         }
     });
 
