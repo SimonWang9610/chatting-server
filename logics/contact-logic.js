@@ -58,8 +58,21 @@ const isValidName = async (username) => {
     }
 }
 
+const getAllContacts = async (username) => {
+    const contactModel = await model();
+
+    return contactModel.find(
+        {
+            identity: {
+                $ne: username,
+            }
+        }
+    );
+}
+
 module.exports = {
     upsert,
     getLastRead,
     isValidName,
+    getAllContacts,
 }

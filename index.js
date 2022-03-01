@@ -4,9 +4,7 @@ const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const http = require('http');
 
-const { uuid } = require('uuidv4');
-const crypto = require('crypto');
-
+const Util = require('./utils/util');
 // logics
 const contactLogic = require('./logics/contact-logic');
 const chatLogic = require('./logics/chat-logic');
@@ -48,19 +46,6 @@ app.post(('/login'), async (req, res, next) => {
     const username = req.body.name;
 
     const isValid = await contactLogic.isValidName(username);
-
-    // if (isValid) {
-    //     return res.status(200).json(
-    //         {
-    //             success: true,
-    //             username: username,
-    //         }
-    //     );
-    // } else {
-    //     return res.status(200).json({
-    //        success: false, 
-    //     });
-    // }
     
     return res.status(200).json(
         {
@@ -73,14 +58,7 @@ app.post(('/login'), async (req, res, next) => {
 app.post('/chat', async(req, res, next) => {
     const payload = req.body;
 
-    var hash = crypto.createHash('sha256');
-    hash.update(payload.members.join(','));
-
-    const chatId = hash.digest('base64');
-
-    console.log('create new chat: ' + chatId);
-
-    const chat = await chatLogic.getChat(chatId);
+    const chat = await chatLogic.getIfExist(payload.members);
 
     if (chat) {
         console.log('chat in database: ' + JSON.stringify(chat));
@@ -92,6 +70,8 @@ app.post('/chat', async(req, res, next) => {
         });
     } else {
         console.log('insert a new chat');
+        const chatId = Util.generateUuid();
+
         const affected = await chatLogic.upsert({
             chatId: chatId,
             chatName: payload.name,
@@ -132,6 +112,7 @@ wss.on('connection', (ws, req) => {
         }
     });
 
+    // TODO: get all contacts
     historyMessaging(username, ws);
 
     ws.on('message', (data) => {

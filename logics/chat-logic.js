@@ -97,6 +97,18 @@ const getChat = async (chatId) => {
     );
 }
 
+const getIfExist = async (members) => {
+    const chatModel = await model();
+
+    return chatModel.findOne(
+        {
+            members: {
+                $all: members,
+            }
+        }
+    );
+}
+
 module.exports = {
     addMember,
     removeMember,
@@ -104,4 +116,5 @@ module.exports = {
     getMembers,
     getAllChats,
     getChat,
+    getIfExist
 }

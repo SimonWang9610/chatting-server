@@ -20,7 +20,7 @@ const chatBroadcast = async (chat) => {
 
     for (let member of doc.members) {
         if (clients.has(member) && member !== chat.data.username) {
-            clients[member].send(JSON.stringify(chat));
+            clients.get(member).send(JSON.stringify(chat));
         }
     }
  }

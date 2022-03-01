@@ -38,7 +38,8 @@ const publishing = async () => {
                 identity: next.fullDocument.identity,
                 data: {
                     // return the last added member
-                    username: next.fullDocument.members[-1]
+                    username: next.fullDocument.members[-1],
+                    operation: 'update'
                 }
             }
             
@@ -50,6 +51,7 @@ const publishing = async () => {
                 data: {
                     id: next.fullDocument.identity,
                     name: next.fullDocument.name,
+                    operation: 'create'
                 }
             };
 

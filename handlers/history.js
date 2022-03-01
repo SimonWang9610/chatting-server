@@ -5,8 +5,10 @@ const chatLogic = require('../logics/chat-logic');
 const sendHistoryMessages = async (username, ws) => {
     
     const contact = await contactLogic.getLastRead(username);
-
+    console.log('get contact:' + JSON.stringify(contact));
     console.log('message last read: ' + contact.lastRead);
+
+    if (!contact) return;
 
     const chats = await chatLogic.getAllChats(username).then((docs) => {
         let arr = [];
@@ -43,9 +45,35 @@ const sendHistoryMessages = async (username, ws) => {
         });
     }
 
-    messageLogic.clear();
+    //messageLogic.clear();
 
     return true;
  };
 
-module.exports = sendHistoryMessages;
+ const sendAllContacts = async (username, ws) => {
+    const contacts = await contactLogic.getAllContacts(username);
+
+    if (contacts && contacts.length > 0) {
+        for (let contact of contacts) {
+            const msg = {
+                topic: 'Topic.contact',
+                identity: contact.identity,
+                data: {
+                    name: contact.identity,
+                    online: contact.online,
+                }
+            }
+            ws.send(JSON.stringify(msg), (err) => {
+                if (err) {
+                    console.log('failed to send Tpoic.contact: ' + JSON.stringify(msg));
+                }
+            });
+        }
+    }
+ }
+
+
+module.exports = (username, ws) => {
+    sendAllContacts(username, ws);
+    sendHistoryMessages(username, ws);
+}
