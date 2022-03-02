@@ -12,7 +12,7 @@ const chatLogic = require('./logics/chat-logic');
 // handlers
 const updater = require('./handlers/database-updater');
 const historyMessaging = require('./handlers/history');
-const publishing = require('./handlers/publisher');
+const publisher = require('./handlers/publisher');
 const subscription = require('./handlers/subscriber');
 
 // redis pubsub
@@ -21,11 +21,11 @@ const clients = require('./cache/client');
 // app & webSocket
 const app = express();
 
-app.use((req, res, next) => {
-    console.log(req.headers);
-    console.log(req.body);
-    next();
-});
+// app.use((req, res, next) => {
+//     console.log(req.headers);
+//     console.log(req.body);
+//     next();
+// });
 
 app.use(bodyParser.urlencoded({ extended: false, limit: '10mb' }));
 app.use(bodyParser.json({ limit: '25mb' }));
@@ -39,7 +39,7 @@ const httpServer = http.createServer(app);
 
 const wss = new WebSocket.Server({server: httpServer});
 
-publishing();
+publisher.publishing();
 subscription();
 
 app.post(('/login'), async (req, res, next) => {
@@ -62,9 +62,12 @@ app.post('/chat', async(req, res, next) => {
 
     if (chat) {
         console.log('chat in database: ' + JSON.stringify(chat));
+        
+        // publisher.openChat(chat, payload.creator);
+
         return res.status(200).json({
             success: true,
-            id: chat.identity,
+            identity: chat.identity,
             name: chat.name,
             members: chat.members,
         });

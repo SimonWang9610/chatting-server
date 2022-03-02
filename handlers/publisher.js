@@ -1,6 +1,8 @@
 const publisher = require('../cache/redis').create();
 const models = require('../database/models');
-const publishing = async () => {
+
+const publishing = async (message) => {
+
     const contactModel = await models.getModel('contacts');
     const chatModel = await models.getModel('chats');
     const messageModel = await models.getModel('messages');
@@ -79,4 +81,13 @@ const publishing = async () => {
     
 };
 
-module.exports = publishing;
+const openChat = (chat, creator) => {
+    chat.creator = creator;
+    
+    publisher.publish(chat.topic, JSON.stringify(chat));
+}
+
+module.exports = {
+    publishing,
+    openChat,
+}

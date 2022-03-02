@@ -18,8 +18,10 @@ const chatBroadcast = async (chat) => {
 
     const doc = await chatLogic.getMembers(chat.identity);
 
+    console.log('chat members: ' + JSON.stringify(doc));
+    
     for (let member of doc.members) {
-        if (clients.has(member) && member !== chat.data.username) {
+        if (clients.has(member) && member !== chat.creator) {
             clients.get(member).send(JSON.stringify(chat));
         }
     }
